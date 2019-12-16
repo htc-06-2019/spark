@@ -1,9 +1,10 @@
 package fr.htc.aga.streaming;
 
-import org.apache.kafka.common.TopicPartition;
-import org.apache.spark.streaming.kafka010.OffsetRange;
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.Stat;
+import static fr.htc.aga.common.Constants.CHARSET_ENCODING;
+import static fr.htc.aga.common.Constants.KAFKA_CONSUMER_GROUP_ID;
+import static fr.htc.aga.common.Constants.ZK_CONNECTION_STRING;
+import static fr.htc.aga.common.Constants.ZK_OFFSET_COMMIT_ROOT_PATH;
+import static fr.htc.aga.common.Constants.ZK_PATH_SEPARATOR;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -11,12 +12,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kafka.common.TopicPartition;
+import org.apache.spark.streaming.kafka010.OffsetRange;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
+
+import fr.htc.aga.common.Constants;
+
 
 /*
 Class used to handle offset of Spark Streaming Jobs
  */
 public class ZKOffSetManager {
-    private static String ZPATH_SEPARATOR = "/" ;
     private ZooKeeper zkeeper;
     private String commitRootPath;
     private String consumerGrpPath;
@@ -27,7 +37,7 @@ public class ZKOffSetManager {
         this.zkeeper = new ZooKeeper(connectionString, 2000000, null);
         this.commitRootPath = commitRootPath;
         this.consumerGrp = consumerGrp;
-        this.consumerGrpPath = this.commitRootPath + ZPATH_SEPARATOR + this.consumerGrp ;
+        this.consumerGrpPath = this.commitRootPath + ZK_PATH_SEPARATOR + this.consumerGrp ;
         this.initilize();
     }
 
@@ -52,7 +62,7 @@ public class ZKOffSetManager {
         byte[] realData = new byte[0];
         int pos=1;
         do {
-            pos=path.indexOf(ZPATH_SEPARATOR,pos + 1);
+            pos=path.indexOf(ZK_PATH_SEPARATOR,pos + 1);
             if (pos == -1) {
                 pos=path.length();
                 realData = data ;
@@ -68,7 +78,7 @@ public class ZKOffSetManager {
     private Object getZNodeData(String path, boolean watchFlag) throws KeeperException,InterruptedException, UnsupportedEncodingException {
         byte[] b = null;
         b = zkeeper.getData(path, null, null);
-        return new String(b, "UTF-8");
+        return new String(b, CHARSET_ENCODING);
     }
 
     private void updateOrCreate(String path, byte[] data) throws KeeperException,InterruptedException {
@@ -89,7 +99,7 @@ public class ZKOffSetManager {
     public void commitOffset(OffsetRange[] offsetRanges) throws KeeperException, InterruptedException {
         for (OffsetRange o : offsetRanges){
             this.updateOrCreate(
-                    this.consumerGrpPath + ZPATH_SEPARATOR  + o.topic()  + ZPATH_SEPARATOR + o.partition(),
+                    this.consumerGrpPath + ZK_PATH_SEPARATOR  + o.topic()  + ZK_PATH_SEPARATOR + o.partition(),
                     String.valueOf(o.untilOffset()).getBytes()
             );
         }
@@ -106,10 +116,10 @@ public class ZKOffSetManager {
         }
         List<String> topics = zkeeper.getChildren(rootP, false);
         for(String topic:topics){
-            String topicPath = rootP + ZPATH_SEPARATOR + topic ;
+            String topicPath = rootP + ZK_PATH_SEPARATOR + topic ;
             List<String> partitions = zkeeper.getChildren(topicPath, false);
             for(String partition: partitions){
-                Long fromOffset = Long.valueOf(String.valueOf(this.getZNodeData(topicPath + ZPATH_SEPARATOR + partition, false)));
+                Long fromOffset = Long.valueOf(String.valueOf(this.getZNodeData(topicPath + ZK_PATH_SEPARATOR + partition, false)));
                 TopicPartition tp = new TopicPartition(topic, Integer.valueOf(partition)) ;
                 startingOffset.put(tp,fromOffset) ;
             }
@@ -118,8 +128,7 @@ public class ZKOffSetManager {
     }
 
     public static void main (String[] args) throws InterruptedException, IOException, KeeperException {
-        String consumerGrp = "SparkStreamingTraining-Grp";
-        ZKOffSetManager zkOffSetManager = new ZKOffSetManager("localhost:2181", "/spark-streaming-offsets", consumerGrp);
+        ZKOffSetManager zkOffSetManager = new ZKOffSetManager(ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
 
         Map<TopicPartition, Long> offsets = zkOffSetManager.getCommitedOffset();
         System.out.println(offsets) ;

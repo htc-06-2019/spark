@@ -1,5 +1,13 @@
 package fr.htc.aga.streaming;
 
+import static fr.htc.aga.common.Constants.APPLICATION_NAME;
+import static fr.htc.aga.common.Constants.ENVIRONNEMENT_NAME;
+import static fr.htc.aga.common.Constants.KAFKA_BOOTSTRAP;
+import static fr.htc.aga.common.Constants.KAFKA_CONSUMER_GROUP_ID;
+import static fr.htc.aga.common.Constants.KAFKA_TOPIC_NAME;
+import static fr.htc.aga.common.Constants.SPARK_MASTER_NAME;
+import static fr.htc.aga.common.Constants.ZK_OFFSET_COMMIT_ROOT_PATH;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +29,8 @@ import org.apache.spark.streaming.kafka010.LocationStrategies;
 import org.apache.spark.streaming.kafka010.OffsetRange;
 import org.apache.zookeeper.KeeperException;
 
+import fr.htc.aga.common.Constants;
+
 public class SparkStreamingKafka {
 
 	/**
@@ -31,23 +41,18 @@ public class SparkStreamingKafka {
 	 * @throws KeeperException
 	 */
 	public static void main(String[] args) throws InterruptedException, IOException, KeeperException {
-		String env = "DEV";
-		String appName = "test";
 		int duration = 30;
-		String kafkaBootstrap = "aga.hdp:6667";
-		String topic = "sparkstreamingtest";
-		String consumerGrp = "aga.training.sparkstreaming.SparkStreamingTraining-Grp";
-		String zkConnectionString = "localhost:2181";
-		String zkOffsetCommitRootPath = "/spark-streaming-offsets";
 	
-		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(zkConnectionString, zkOffsetCommitRootPath, consumerGrp);
+		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
 
-		JavaStreamingContext jssc = buildSparkStreamingContext(env, appName, duration);
+		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration);
 
-		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, kafkaBootstrap,
-				topic, consumerGrp);
+		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, KAFKA_BOOTSTRAP,
+				KAFKA_TOPIC_NAME, KAFKA_CONSUMER_GROUP_ID);
 
 		stream.foreachRDD(new VoidFunction<JavaRDD<ConsumerRecord<String, String>>>() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void call(JavaRDD<ConsumerRecord<String, String>> consumerRecordJavaRDD) throws Exception {
 				RDD<ConsumerRecord<String, String>> rdd = consumerRecordJavaRDD.rdd();
@@ -73,8 +78,8 @@ public class SparkStreamingKafka {
 	 */
 	public static JavaStreamingContext buildSparkStreamingContext(String env, String appName, int duration) {
 		SparkConf conf = new SparkConf().setAppName(appName);
-		if (env.equals("DEV")) {
-			conf = conf.setMaster("local[2]");
+		if (env.equals(ENVIRONNEMENT_NAME)) {
+			conf = conf.setMaster(SPARK_MASTER_NAME);
 		}
 		JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(duration));
 		return jssc;
@@ -91,7 +96,7 @@ public class SparkStreamingKafka {
 	private static JavaInputDStream<ConsumerRecord<String, String>> buildStreamFromEarliestOffset(
 			JavaStreamingContext jssc, String kafkaBootstrap, String topic, String consumerGrp) {
 
-		Map<String, Object> kafkaParams = new HashMap();
+		Map<String, Object> kafkaParams = new HashMap<String, Object>();
 
 		kafkaParams.put("bootstrap.servers", kafkaBootstrap);
 		kafkaParams.put("key.deserializer", StringDeserializer.class);

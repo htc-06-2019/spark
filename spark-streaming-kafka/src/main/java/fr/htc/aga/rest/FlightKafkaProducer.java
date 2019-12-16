@@ -4,6 +4,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import fr.htc.aga.common.Constants;
+
+import static fr.htc.aga.common.Constants.API_REST_ID;
+import static fr.htc.aga.common.Constants.API_REST_KEY;
+import static fr.htc.aga.common.Constants.KAFKA_BOOTSTRAP;
+import static fr.htc.aga.common.Constants.KAFKA_TOPIC_NAME;
+
 import java.util.List;
 import java.util.Properties;
 
@@ -55,22 +62,13 @@ public class FlightKafkaProducer {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        String appId = "ddf5a84d";
-        String appKey = "cba9fc3b52ccc8e445ae7a01a8fc6157";
-
-        String kafkaBootstrap = "aga.hdp:6667" ;
-        String topic = "sparkstreamingtest" ;
-
-        FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(appId,appKey) ;
-        FlightKafkaProducer producer = new FlightKafkaProducer(kafkaBootstrap,topic ) ;
+    	
+        FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(API_REST_ID, API_REST_KEY) ;
+        FlightKafkaProducer producer = new FlightKafkaProducer(KAFKA_BOOTSTRAP , KAFKA_TOPIC_NAME) ;
 
         while(true){
             producer.send(fInfoFetcher.getFlights());
             Thread.sleep(10000);
         }
     }
-
-
-
-
 }

@@ -1,5 +1,15 @@
 package fr.htc.aga.rest;
 
+import static fr.htc.aga.common.Constants.API_REST_ID;
+import static fr.htc.aga.common.Constants.API_REST_KEY;
+import static fr.htc.aga.common.Constants.API_URL;
+import static fr.htc.aga.common.Constants.CHARSET_ENCODING;
+import static fr.htc.aga.common.Constants.FLIGHTS_SERVICE_PATH;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -12,15 +22,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /*
  Class used to fetch flying data from a Rest API
  */
 public class FlightInfoFetcher {
-	final static String API_URL = "https://api.schiphol.nl/public-flights/flights";
+	
 	private String appId;
 	private String appKey;
 	private HttpClient httpClient;
@@ -47,11 +53,12 @@ public class FlightInfoFetcher {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<String> getFlights() {
 		try {
 			HttpResponse response = httpClient.execute(this.preparedHttpRequest);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
+				String responseBody = EntityUtils.toString(response.getEntity(), CHARSET_ENCODING);
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = null;
 				try {
@@ -59,8 +66,8 @@ public class FlightInfoFetcher {
 				} catch (ParseException e) {
 					return null;
 				}
-				JSONArray flights = (JSONArray) jsonObject.get("flights");
-				List<String> flightsAsSrring = new ArrayList();
+				JSONArray flights = (JSONArray) jsonObject.get(FLIGHTS_SERVICE_PATH);
+				List<String> flightsAsSrring = new ArrayList<String>();
 				flights.forEach(x -> flightsAsSrring.add(x.toString()));
 				return flightsAsSrring;
 			} else {
@@ -80,10 +87,7 @@ public class FlightInfoFetcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String appId = "ddf5a84d";
-		String appKey = "cba9fc3b52ccc8e445ae7a01a8fc6157";
-
-		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(appId,appKey) ;
+		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(API_REST_ID, API_REST_KEY) ;
 		
 		fInfoFetcher.getFlights().forEach(System.out::println);
 	}
