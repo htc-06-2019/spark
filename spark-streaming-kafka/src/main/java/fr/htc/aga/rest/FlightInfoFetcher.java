@@ -33,9 +33,11 @@ public class FlightInfoFetcher {
 	private HttpGet preparedHttpRequest;
 
 	/**
-	 * 
-	 * @param appId
+	 * les deux paramètres d'authontification fournits après inscription pour se connecter l'api rest
+	 * @param appId  
 	 * @param apiKey
+	 * Cette méthode permet d'etablir un lien avec l'API rest  en utilisant un Http getter
+	 *  
 	 */
 	public FlightInfoFetcher(String appId, String apiKey) {
 		this.appId = appId;
@@ -50,15 +52,17 @@ public class FlightInfoFetcher {
 	}
 
 	/**
-	 * 
+	 * cette methode permet de recupérer tous les vols  de la journée 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public List<String> getFlights() {
 		try {
+			//ici on crée une réponse http qui va etablir une liaison client en exécutant les param definit dans preparedHttpRequest
 			HttpResponse response = httpClient.execute(this.preparedHttpRequest);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				String responseBody = EntityUtils.toString(response.getEntity(), CHARSET_ENCODING);
+				
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = null;
 				try {
@@ -66,6 +70,7 @@ public class FlightInfoFetcher {
 				} catch (ParseException e) {
 					return null;
 				}
+				//
 				JSONArray flights = (JSONArray) jsonObject.get(FLIGHTS_SERVICE_PATH);
 				List<String> flightsAsSrring = new ArrayList<String>();
 				flights.forEach(x -> flightsAsSrring.add(x.toString()));

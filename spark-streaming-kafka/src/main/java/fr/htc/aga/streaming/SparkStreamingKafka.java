@@ -114,7 +114,12 @@ public class SparkStreamingKafka {
 	 * @param streamRDD
 	 */
 	public static void handleRDDStream(RDD<ConsumerRecord<String, String>> streamRDD) {
-		// TODO Do what ever you want with the RDD
+		System.out.println("*********************************************************");
+		streamRDD.toJavaRDD()
+		.map(f -> "Key = " +  f.key() + " Value = " + f.value())
+		.foreach(line -> System.out.println(line));;
+		System.out.println(streamRDD.count());
+		System.out.println("*********************************************************");
 	}
 
 }
