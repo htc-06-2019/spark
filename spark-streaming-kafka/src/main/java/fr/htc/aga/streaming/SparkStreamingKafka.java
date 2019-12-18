@@ -44,7 +44,7 @@ public class SparkStreamingKafka {
 		int duration = 30;
 	
 		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
-
+// Build a Spark streaming Context and assign params like : Env name and App name , and the duration of the kept data before cleaning 
 		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration);
 
 		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, KAFKA_BOOTSTRAP,
