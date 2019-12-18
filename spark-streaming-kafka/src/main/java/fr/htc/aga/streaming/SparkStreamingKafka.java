@@ -44,7 +44,7 @@ public class SparkStreamingKafka {
 		int duration = 30;
 	
 		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
-// Build a Spark streaming Context and assign params like : Env name and App name , and the duration of the kept data before cleaning 
+
 		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration);
 
 		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, KAFKA_BOOTSTRAP,
@@ -76,11 +76,16 @@ public class SparkStreamingKafka {
 	 * @param duration
 	 * @return
 	 */
+
+	// Build a Spark streaming Context and assign params like : Env name and App name
+	
 	public static JavaStreamingContext buildSparkStreamingContext(String env, String appName, int duration) {
 		SparkConf conf = new SparkConf().setAppName(appName);
 		if (env.equals(ENVIRONNEMENT_NAME)) {
 			conf = conf.setMaster(SPARK_MASTER_NAME);
 		}
+		
+		// duration's meaning  = duration of the spark's kept data before be cleaned 
 		JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(duration));
 		return jssc;
 	}
@@ -98,13 +103,17 @@ public class SparkStreamingKafka {
 
 		Map<String, Object> kafkaParams = new HashMap<String, Object>();
 
-		kafkaParams.put("bootstrap.servers", kafkaBootstrap);
-		kafkaParams.put("key.deserializer", StringDeserializer.class);
-		kafkaParams.put("value.deserializer", StringDeserializer.class);
-		kafkaParams.put("group.id", consumerGrp);
-		kafkaParams.put("auto.offset.reset", "earliest");
-		kafkaParams.put("enable.auto.commit", false);
-
+		kafkaParams.put("bootstrap.servers", kafkaBootstrap); //because a consumer requires bootstrap servers to consume messages from any  requested topic 
+		kafkaParams.put("key.deserializer", StringDeserializer.class);// deserializer for Kafka stream (only Key) using Spark structured streaming
+		kafkaParams.put("value.deserializer", StringDeserializer.class); // deserializer for Kafka stream (only Value) using Spark structured streaming
+		kafkaParams.put("group.id", consumerGrp); // setting consumer's group name (API wich consume data from kafka ex : Spark)
+		kafkaParams.put("auto.offset.reset", "earliest"); //consume data from the beginning of the parition ; from partition [0] 
+		
+		/*Manually Commit offsetRanges to Kafka (setting arg to FALSE  : 
+		if the Consumer crashes whilst processing a message it will start consuming from that same Offset, so no messages lost.*/
+		
+		kafkaParams.put("enable.auto.commit", false); 
+		// LocationStrategies.PreferConsistent() : This will distribute partitions evenly across available executors 
 		return KafkaUtils.createDirectStream(jssc, LocationStrategies.PreferConsistent(),
 				ConsumerStrategies.Subscribe(Arrays.asList(topic), kafkaParams));
 	}
