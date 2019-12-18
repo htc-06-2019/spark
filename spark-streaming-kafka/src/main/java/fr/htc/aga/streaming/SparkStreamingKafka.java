@@ -44,9 +44,13 @@ public class SparkStreamingKafka {
 		int duration = 30;
 	
 		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
-
+/**
+ * 
+ */
 		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration);
-
+/**
+ * 
+ */
 		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, KAFKA_BOOTSTRAP,
 				KAFKA_TOPIC_NAME, KAFKA_CONSUMER_GROUP_ID);
 

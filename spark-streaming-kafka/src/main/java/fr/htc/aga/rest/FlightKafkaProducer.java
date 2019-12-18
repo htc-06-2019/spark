@@ -1,11 +1,5 @@
 package fr.htc.aga.rest;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-
-import fr.htc.aga.common.Constants;
-
 import static fr.htc.aga.common.Constants.API_REST_ID;
 import static fr.htc.aga.common.Constants.API_REST_KEY;
 import static fr.htc.aga.common.Constants.KAFKA_BOOTSTRAP;
@@ -13,6 +7,10 @@ import static fr.htc.aga.common.Constants.KAFKA_TOPIC_NAME;
 
 import java.util.List;
 import java.util.Properties;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 /*
 Class used to populate Kafka topic with the fetched flight data to be used in the spark streaming job
@@ -42,6 +40,9 @@ public class FlightKafkaProducer {
      * @param events
      */
     public void send(List<String> events){
+    	/**
+    	 * 
+    	 */
         events.forEach( e -> {
                 this.producer.send(new ProducerRecord<String, String>(topic, e), (recordMetadata, e1) -> {
                     if (e == null){
