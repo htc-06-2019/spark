@@ -4,8 +4,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import fr.htc.aga.common.Constants;
-
 import static fr.htc.aga.common.Constants.API_REST_ID;
 import static fr.htc.aga.common.Constants.API_REST_KEY;
 import static fr.htc.aga.common.Constants.KAFKA_BOOTSTRAP;
@@ -26,6 +24,7 @@ public class FlightKafkaProducer {
      * @param bootstrap
      * @param topic
      */
+    //définition des params du producer
     public FlightKafkaProducer(String bootstrap, String topic){
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
@@ -40,12 +39,13 @@ public class FlightKafkaProducer {
     /**
      * This method send all messages in collection param
      * @param events
+     * cette methode envoie les messages vers un topic kafka avec un callback
      */
     public void send(List<String> events){
         events.forEach( e -> {
                 this.producer.send(new ProducerRecord<String, String>(topic, e), (recordMetadata, e1) -> {
-                    if (e == null){
-                        System.out.println("Error when sending record: " + e) ;
+                    if (e1 == null){
+                        System.out.println("Error when sending record: " + e1) ;
                     }
                     else{
                         // No thing to do
