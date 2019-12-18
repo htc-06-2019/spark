@@ -41,11 +41,13 @@ public class SparkStreamingKafka {
 	 * @throws KeeperException
 	 */
 //  gèrer les exceptions dans cette méthode
-	public static void main(String[] args) throws InterruptedException, IOException, KeeperException {  
+	public static void main(String[] args) throws InterruptedException, IOException, KeeperException {
 		int duration = 30;
-		// instancions un objet de type ZKOffSetManager  utilisée pour gérer le décalage des travaux Spark Streaming
-		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING, ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID); 
-		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration); 
+		// instancions un objet de type ZKOffSetManager utilisée pour gérer le décalage
+		// des travaux Spark Streaming
+		ZKOffSetManager zkOffSetManager = new ZKOffSetManager(Constants.ZK_CONNECTION_STRING,
+				ZK_OFFSET_COMMIT_ROOT_PATH, KAFKA_CONSUMER_GROUP_ID);
+		JavaStreamingContext jssc = buildSparkStreamingContext(ENVIRONNEMENT_NAME, APPLICATION_NAME, duration);
 
 		JavaInputDStream<ConsumerRecord<String, String>> stream = buildStreamFromEarliestOffset(jssc, KAFKA_BOOTSTRAP,
 				KAFKA_TOPIC_NAME, KAFKA_CONSUMER_GROUP_ID);
@@ -68,7 +70,7 @@ public class SparkStreamingKafka {
 		jssc.start();
 		jssc.awaitTermination();
 	}
-	
+
 	/**
 	 * 
 	 * @param env
@@ -77,8 +79,9 @@ public class SparkStreamingKafka {
 	 * @return
 	 */
 
-		// point d'entrée pour les fonctionnalités sparkstreaming
-		public static JavaStreamingContext buildSparkStreamingContext(String env, String appName, int duration) {
+	// point d'entrée pour les fonctionnalités sparkstreaming
+
+	public static JavaStreamingContext buildSparkStreamingContext(String env, String appName, int duration) {
 		SparkConf conf = new SparkConf().setAppName(appName);
 		if (env.equals(ENVIRONNEMENT_NAME)) {
 			conf = conf.setMaster(SPARK_MASTER_NAME);
@@ -86,9 +89,10 @@ public class SparkStreamingKafka {
 		JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(duration));
 		return jssc;
 	}
-	
+
 	/**
 	 * Input Streaming reading kafka topic from the earliest offset
+	 * 
 	 * @param jssc
 	 * @param kafkaBootstrap
 	 * @param topic
@@ -110,7 +114,7 @@ public class SparkStreamingKafka {
 		return KafkaUtils.createDirectStream(jssc, LocationStrategies.PreferConsistent(),
 				ConsumerStrategies.Subscribe(Arrays.asList(topic), kafkaParams));
 	}
-	
+
 	/**
 	 * 
 	 * @param streamRDD

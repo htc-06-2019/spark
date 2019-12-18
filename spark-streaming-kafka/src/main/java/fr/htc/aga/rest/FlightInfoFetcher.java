@@ -22,7 +22,7 @@ import java.util.List;
  *
  */
 /*
- Class used to fetch flying data from a Rest API
+ * Class used to fetch flying data from a Rest API
  */
 public class FlightInfoFetcher { // initialisation des objects
 	final static String API_URL = "https://api.schiphol.nl/public-flights/flights";
@@ -36,14 +36,14 @@ public class FlightInfoFetcher { // initialisation des objects
 	 * @param appId
 	 * @param apiKey
 	 */
-	 //constructor prend  cle , valeur )
+	// constructor prend cle , valeur )
 	public FlightInfoFetcher(String appId, String apiKey) {
 		this.appId = appId;
 		this.appKey = apiKey;
 		this.httpClient = HttpClients.createDefault();
-		//header = ensembele cle valeur
-		preparedHttpRequest = new HttpGet(API_URL); 	
-		 // HttpRequest: la requete elle meme
+		// header = ensembele cle valeur
+		preparedHttpRequest = new HttpGet(API_URL);
+		// HttpRequest: la requete elle meme
 		preparedHttpRequest.addHeader("ResourceVersion", "v4");
 		preparedHttpRequest.addHeader("app_id", this.appId); // parametres
 		preparedHttpRequest.addHeader("app_key", this.appKey); // les inclures dans le header de la requete
@@ -57,25 +57,26 @@ public class FlightInfoFetcher { // initialisation des objects
 	 */
 	public List<String> getFlights() {
 		try {
-			HttpResponse response = httpClient.execute(this.preparedHttpRequest); //executer la requete
-			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) { 
+			HttpResponse response = httpClient.execute(this.preparedHttpRequest); // executer la requete
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				// tester la requete : public static final int SC_OK = 200;
-				String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8"); // qd Ok, je recupere responseBody
-				 // creer un parseur pr parser ds un fichier json
+				String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8"); // qd Ok, je recupere
+																							// responseBody
+				// creer un parseur pr parser ds un fichier json
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = null; // initialer l object json
 				try {
 					// (JSONObject) :caster vers jsonobject
-					jsonObject = (JSONObject) parser.parse(responseBody); 
+					jsonObject = (JSONObject) parser.parse(responseBody);
 				} catch (ParseException e) {
 					return null;
 				}
-				// recuper les flights dans la liste de json flight car json est 
-				//plus utile comme recuperer les element de la racine flight
+				// recuper les flights dans la liste de json flight car json est
+				// plus utile comme recuperer les element de la racine flight
 				JSONArray flights = (JSONArray) jsonObject.get("flights");
-				List<String> flightsAsSrring = new ArrayList(); 
-				//convertir json vers string
-				flights.forEach(jsonFlight -> flightsAsSrring.add(jsonFlight.toString())); 
+				List<String> flightsAsSrring = new ArrayList();
+				// convertir json vers string
+				flights.forEach(jsonFlight -> flightsAsSrring.add(jsonFlight.toString()));
 				return flightsAsSrring;
 			} else {
 				return null;
@@ -88,17 +89,17 @@ public class FlightInfoFetcher { // initialisation des objects
 		return null;
 	}
 
-
 	/**
 	 * Test it
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		String appId = "ddf5a84d";
 		String appKey = "cba9fc3b52ccc8e445ae7a01a8fc6157";
 
-		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(appId,appKey) ;
-		
+		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(appId, appKey);
+
 		fInfoFetcher.getFlights().forEach(System.out::println);
 	}
 }
