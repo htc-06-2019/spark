@@ -16,6 +16,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * @author m.mellali
+ *
+ */
 /*
  Class used to fetch flying data from a Rest API
  */
@@ -31,12 +36,15 @@ public class FlightInfoFetcher { // initialisation des objects
 	 * @param appId
 	 * @param apiKey
 	 */
-	public FlightInfoFetcher(String appId, String apiKey) { //constructor prend la cle et la valeur )
+	 //constructor prend  cle , valeur )
+	public FlightInfoFetcher(String appId, String apiKey) {
 		this.appId = appId;
 		this.appKey = apiKey;
 		this.httpClient = HttpClients.createDefault();
-		preparedHttpRequest = new HttpGet(API_URL); 	//header = ensembele cle valeur
-		preparedHttpRequest.addHeader("ResourceVersion", "v4"); // HttpRequest: la requete elle meme
+		//header = ensembele cle valeur
+		preparedHttpRequest = new HttpGet(API_URL); 	
+		 // HttpRequest: la requete elle meme
+		preparedHttpRequest.addHeader("ResourceVersion", "v4");
 		preparedHttpRequest.addHeader("app_id", this.appId); // parametres
 		preparedHttpRequest.addHeader("app_key", this.appKey); // les inclures dans le header de la requete
 		preparedHttpRequest.addHeader("Accept", "application/json"); // recevoir de json
@@ -50,18 +58,24 @@ public class FlightInfoFetcher { // initialisation des objects
 	public List<String> getFlights() {
 		try {
 			HttpResponse response = httpClient.execute(this.preparedHttpRequest); //executer la requete
-			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) { // tester la requete : public static final int SC_OK = 200;
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) { 
+				// tester la requete : public static final int SC_OK = 200;
 				String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8"); // qd Ok, je recupere responseBody
-				JSONParser parser = new JSONParser(); // creer un parseur prparser ds un fichier json
+				 // creer un parseur pr parser ds un fichier json
+				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = null; // initialer l object json
 				try {
-					jsonObject = (JSONObject) parser.parse(responseBody); // (JSONObject) :caster vers jsonobject
+					// (JSONObject) :caster vers jsonobject
+					jsonObject = (JSONObject) parser.parse(responseBody); 
 				} catch (ParseException e) {
 					return null;
 				}
-				JSONArray flights = (JSONArray) jsonObject.get("flights"); // recuper les flights dans la liste de json flight car json est plus utile comme recuperer les element de la racine flight
+				// recuper les flights dans la liste de json flight car json est 
+				//plus utile comme recuperer les element de la racine flight
+				JSONArray flights = (JSONArray) jsonObject.get("flights");
 				List<String> flightsAsSrring = new ArrayList(); 
-				flights.forEach(jsonFlight -> flightsAsSrring.add(jsonFlight.toString())); //convertir json vers string
+				//convertir json vers string
+				flights.forEach(jsonFlight -> flightsAsSrring.add(jsonFlight.toString())); 
 				return flightsAsSrring;
 			} else {
 				return null;
