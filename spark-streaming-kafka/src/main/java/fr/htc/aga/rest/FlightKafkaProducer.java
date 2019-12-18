@@ -39,10 +39,11 @@ public class FlightKafkaProducer {
      * This method send all messages in collection param
      * @param events
      */
+    /**
+     * cette méthode permet de envoyer les envenements au topic kafka
+     */
     public void send(List<String> events){
-    	/**
-    	 * 
-    	 */
+    	
         events.forEach( e -> {
                 this.producer.send(new ProducerRecord<String, String>(topic, e), (recordMetadata, e1) -> {
                     if (e == null){
@@ -61,7 +62,9 @@ public class FlightKafkaProducer {
         this.producer.flush();
         this.producer.close();
     }
-
+/**
+ * recupération des infos de vols et lacer le producer qui récupère les message chaque 10 s
+ */
     public static void main(String[] args) throws InterruptedException {
     	
         FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(API_REST_ID, API_REST_KEY) ;
