@@ -1,15 +1,5 @@
 package fr.htc.aga.rest;
 
-import static fr.htc.aga.common.Constants.API_REST_ID;
-import static fr.htc.aga.common.Constants.API_REST_KEY;
-import static fr.htc.aga.common.Constants.API_URL;
-import static fr.htc.aga.common.Constants.CHARSET_ENCODING;
-import static fr.htc.aga.common.Constants.FLIGHTS_SERVICE_PATH;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -22,11 +12,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  Class used to fetch flying data from a Rest API
  */
-public class FlightInfoFetcher {
-	
+public class FlightInfoFetcher { // initialisation des objects
+	final static String API_URL = "https://api.schiphol.nl/public-flights/flights";
 	private String appId;
 	private String appKey;
 	private HttpClient httpClient;
@@ -37,15 +31,15 @@ public class FlightInfoFetcher {
 	 * @param appId
 	 * @param apiKey
 	 */
-	public FlightInfoFetcher(String appId, String apiKey) {
+	public FlightInfoFetcher(String appId, String apiKey) { //constructor prend la cle et la valeur )
 		this.appId = appId;
 		this.appKey = apiKey;
 		this.httpClient = HttpClients.createDefault();
-		preparedHttpRequest = new HttpGet(API_URL);
-		preparedHttpRequest.addHeader("ResourceVersion", "v4");
-		preparedHttpRequest.addHeader("app_id", this.appId);
-		preparedHttpRequest.addHeader("app_key", this.appKey);
-		preparedHttpRequest.addHeader("Accept", "application/json");
+		preparedHttpRequest = new HttpGet(API_URL); 	//header = ensembele cle valeur
+		preparedHttpRequest.addHeader("ResourceVersion", "v4"); // HttpRequest: la requete elle meme
+		preparedHttpRequest.addHeader("app_id", this.appId); // parametres
+		preparedHttpRequest.addHeader("app_key", this.appKey); // les inclures dans le header de la requete
+		preparedHttpRequest.addHeader("Accept", "application/json"); // recevoir de json
 
 	}
 
@@ -53,22 +47,21 @@ public class FlightInfoFetcher {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<String> getFlights() {
 		try {
-			HttpResponse response = httpClient.execute(this.preparedHttpRequest);
-			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				String responseBody = EntityUtils.toString(response.getEntity(), CHARSET_ENCODING);
-				JSONParser parser = new JSONParser();
-				JSONObject jsonObject = null;
+			HttpResponse response = httpClient.execute(this.preparedHttpRequest); //executer la requete
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) { // tester la requete : public static final int SC_OK = 200;
+				String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8"); // qd Ok, je recupere responseBody
+				JSONParser parser = new JSONParser(); // creer un parseur prparser ds un fichier json
+				JSONObject jsonObject = null; // initialer l object json
 				try {
-					jsonObject = (JSONObject) parser.parse(responseBody);
+					jsonObject = (JSONObject) parser.parse(responseBody); // (JSONObject) :caster vers jsonobject
 				} catch (ParseException e) {
 					return null;
 				}
-				JSONArray flights = (JSONArray) jsonObject.get(FLIGHTS_SERVICE_PATH);
-				List<String> flightsAsSrring = new ArrayList<String>();
-				flights.forEach(x -> flightsAsSrring.add(x.toString()));
+				JSONArray flights = (JSONArray) jsonObject.get("flights"); // recuper les flights dans la liste de json flight car json est plus utile comme recuperer les element de la racine flight
+				List<String> flightsAsSrring = new ArrayList(); 
+				flights.forEach(jsonFlight -> flightsAsSrring.add(jsonFlight.toString())); //convertir json vers string
 				return flightsAsSrring;
 			} else {
 				return null;
@@ -87,7 +80,10 @@ public class FlightInfoFetcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(API_REST_ID, API_REST_KEY) ;
+		String appId = "ddf5a84d";
+		String appKey = "cba9fc3b52ccc8e445ae7a01a8fc6157";
+
+		FlightInfoFetcher fInfoFetcher = new FlightInfoFetcher(appId,appKey) ;
 		
 		fInfoFetcher.getFlights().forEach(System.out::println);
 	}

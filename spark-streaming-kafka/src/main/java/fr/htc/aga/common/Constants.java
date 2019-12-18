@@ -21,9 +21,9 @@ public interface Constants {
 	//********************************************************************************
 	//                        KAFKA 
 	//********************************************************************************
-	public final static String KAFKA_BOOTSTRAP = "<hostname:port>";
-	public final static String KAFKA_TOPIC_NAME = "<topic_name>";
-	public final static String KAFKA_CONSUMER_GROUP_ID = "<consumer_group_name>";
+	public final static String KAFKA_BOOTSTRAP = "127.0.0.1:6667";
+	public final static String KAFKA_TOPIC_NAME = "test";
+	public final static String KAFKA_CONSUMER_GROUP_ID = "kafka.spark.grp.id";
 	
 	//********************************************************************************
 	//                        ZOOKEEPER 
