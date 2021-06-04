@@ -46,7 +46,7 @@
         <scala.version>2.11</scala.version>
         <lombok.version>1.18.10</lombok.version>
         <spark.streaming.kafka.version>2.3.0</spark.streaming.kafka.version>
-        <http.client.version>4.5.3</http.client.version>
+        <http.client.version>4.5.13</http.client.version>
         <google.json.version>1.1.1</google.json.version>
         <zookeeper.version>3.4.6</zookeeper.version>
     </properties>
